@@ -1,0 +1,39 @@
+# Virtual Environment
+venv/
+env/
+.venv/
+ENV/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Streamlit
+.streamlit/
+*.log
+
+# Environment Variables
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependency Directories
+node_modules/
+
+# Output/Data Files (optional – comment out if you want to track exports)
+/output/
+*.csv
+*.xlsx
