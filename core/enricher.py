@@ -1,16 +1,17 @@
-# core/enricher.py (FIXED)
-import time
+
 import trafilatura
 from urllib.parse import urljoin, urlparse
-from googlesearch import search
+from duckduckgo_search import DDGS
 
 def google_first_result(query):
     try:
-        for url in search(query, num_results=1, lang="en", sleep_interval=2):
-            return url
+        with DDGS() as ddgs:
+            results = ddgs.text(query, max_results=1)
+            for r in results:
+                return r['href']
     except Exception as e:
-        print(f"Google search failed for '{query}': {e}")
-        return None
+        print(f"DuckDuckGo search failed: {e}")
+    return None
 
 def get_website(company_name):
     try:
