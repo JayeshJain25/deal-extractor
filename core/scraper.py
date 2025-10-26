@@ -5,8 +5,6 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 
 def extract_text_and_links(url):
-  
-    """Extract clean text + relevant links using trafilatura only."""
     downloaded = trafilatura.fetch_url(url)
     if not downloaded:
         raise Exception(f"Failed to fetch URL: {url}")
@@ -15,7 +13,7 @@ def extract_text_and_links(url):
         downloaded,
         include_comments=False,
         include_tables=True,
-        favor_precision=True  # optional: reduces noise
+        favor_precision=True
     )
     
     if not text:
@@ -37,12 +35,11 @@ def extract_deal_links(html, base_url):
         url_lower = full_url.lower()
 
         if any(kw in anchor or kw in url_lower for kw in keywords):
-            if (urlparse(full_url).netloc == base_domain) or any(t in full_url for t in ['sec.gov', 'prnewswire.com', 'businesswire.com', 'reuters.com', 'bloomberg.com', 'fujifilm.com']):
+            if (urlparse(full_url).netloc == base_domain) or any(t in full_url for t in ['sec.gov', 'prnewswire.com', 'businesswire.com', 'reuters.com', 'bloomberg.com']):
                 links.add(full_url)
     return list(links)[:2]
 
 def scrape_with_context(trigger_url):
-    """Scrape trigger URL + 1 hop of relevant links."""
     visited = set()
     all_content = []
 

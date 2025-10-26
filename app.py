@@ -20,7 +20,7 @@ if st.button("Extract Deal Info"):
             with st.spinner("Scraping content..."):
                 sources = scrape_with_context(url)
             
-            with st.spinner("Analyzing with AI (Ollama)..."):
+            with st.spinner("Analyzing with AI..."):
                 deals = extract_deal_info("Main company", sources)
             
             if deals:
