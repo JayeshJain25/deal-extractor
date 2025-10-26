@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from core.scraper import scrape_with_context, extract_text_and_links
 from core.analyzer import extract_deal_info
-from core.enricher import enrich_company
+from core.enricher import enrich_company, generate_company_descriptions
 from core.classifier import is_in_scope_merger_acquisition, classify_deal_type, determine_round_status
 
 st.set_page_config(page_title="M&A Deal Tracker", layout="wide")
@@ -46,14 +46,19 @@ if st.button("Analyze Deal"):
                     target_info = enrich_company(target)
                     acquirer_info = enrich_company(acquirer)
 
-                    # Classify
+                    # Classify  
                     in_scope = is_in_scope_merger_acquisition(target_info, acquirer_info)
                     deal_type = classify_deal_type(target_info, acquirer_info, final_deal["summary"])
                     round_status = determine_round_status(final_deal["summary"])
 
+                    brief_desc, full_desc = generate_company_descriptions(target)
+
+
                     result = {
                         "company_name": target,
                         "acquirer": acquirer,
+                        "brief_description": brief_desc,      # NEW
+                        "full_description": full_desc,  # NEW
                         "deal_type": deal_type,
                         "round_status": round_status,
                         "in_merger_acquisition_scope": in_scope,
