@@ -1,7 +1,7 @@
 streamlit==1.39.0
-trafilatura>=1.12.0
+trafilatura
 beautifulsoup4==4.12.3
 python-dotenv==1.0.1
 pandas==2.2.2
 google-generativeai==0.8.3
-ddgs==9.6.1
+ddgs
