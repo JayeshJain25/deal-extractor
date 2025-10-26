@@ -1,4 +1,4 @@
-# core/analyzer.py (Gemini - Optimized)
+# core/analyzer.py
 import os
 import json
 import re
@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-def extract_deal_info(company_context, sources):
+def extract_deal_info( sources):
     combined = "\n\n---SOURCE BREAK---\n\n".join(
         f"[{i+1}] ({s['url']}): {s['text'][:2500]}" 
         for i, s in enumerate(sources)
