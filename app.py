@@ -15,16 +15,17 @@ url = st.text_input(
 )
 
 if st.button("Analyze Deal"):
-    if not url:
+    if not url.strip():
         st.error("Please enter a URL.")
     else:
         try:
             # Stage 1: Initial extraction to get company names
-            initial_sources = [{"url": url, "text": extract_text_and_links(url)["text"]}]
-            deals = extract_deal_info(initial_sources)
+            with st.spinner("🔍 Parsing article..."):
+                initial_sources = [{"url": url, "text": extract_text_and_links(url)["text"]}]
+                deals = extract_deal_info(initial_sources)
             
             if not deals:
-                st.warning("No valid deal found.")
+                st.warning("No valid deal found in the article.")
             else:
                 results = []
                 for deal in deals:
@@ -32,33 +33,35 @@ if st.button("Analyze Deal"):
                     acquirer = deal["acquirer_or_counterparty"]
 
                     # Stage 2: Re-scrape with context
-                    context_companies = [target, acquirer]
-                    full_sources = scrape_with_context(url, context_companies)
+                    with st.spinner(f"🌐 Fetching relevant pages for {target} and {acquirer}..."):
+                        context_companies = [target, acquirer]
+                        full_sources = scrape_with_context(url, context_companies)
 
                     # Stage 3: Re-extract with full context
-                    final_deals = extract_deal_info(full_sources)
-                    if not final_deals:
-                        final_deal = deal
-                    else:
-                        final_deal = final_deals[0]
+                    with st.spinner("🧠 Analyzing deal details..."):
+                        final_deals = extract_deal_info(full_sources)
+                        final_deal = final_deals[0] if final_deals else deal
 
-                    # Enrich
-                    target_info = enrich_company(target)
-                    acquirer_info = enrich_company(acquirer)
+                    # Enrich target and acquirer
+                    with st.spinner(f"🏢 Enriching company info for {target}..."):
+                        target_info = enrich_company(target)
+                    with st.spinner(f"🏢 Enriching company info for {acquirer}..."):
+                        acquirer_info = enrich_company(acquirer)
 
-                    # Classify  
+                    # Classify deal
                     in_scope = is_in_scope_merger_acquisition(target_info, acquirer_info)
                     deal_type = classify_deal_type(target_info, acquirer_info, final_deal["summary"])
                     round_status = determine_round_status(final_deal["summary"])
 
-                    brief_desc, full_desc = generate_company_descriptions(target)
-
+                    # Generate descriptions
+                    with st.spinner(f"📝 Generating company descriptions for {target}..."):
+                        brief_desc, full_desc = generate_company_descriptions(target)
 
                     result = {
                         "company_name": target,
                         "acquirer": acquirer,
-                        "brief_description": brief_desc,      # NEW
-                        "full_description": full_desc,  # NEW
+                        "brief_description": brief_desc,
+                        "full_description": full_desc,
                         "deal_type": deal_type,
                         "round_status": round_status,
                         "in_merger_acquisition_scope": in_scope,
