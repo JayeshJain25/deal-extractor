@@ -115,41 +115,42 @@ def fetch_company_description_text(company_name):
         print(f"Description fetch failed for {company_name}: {e}")
     return ""
 
+
 def generate_company_descriptions(company_name):
-    """Generate both Brief Description (BD) and Full Description (FD) per methodology."""
+    """Generate BD and FD without marketing language — strictly factual."""
     raw_text = fetch_company_description_text(company_name)
     
     if not raw_text:
-        bd = f"{company_name} is a company that provides products and services."
+        # Fallback: minimal factual BD/FD
+        bd = f"{company_name} is a company that operates in the medical technology sector."
         fd = bd
         return bd, fd
 
-    prompt = f"""You are a corporate research analyst at PitchBook. Generate two descriptions for "{company_name}" following the exact formulas below.
+    prompt = f"""You are a corporate research analyst at PitchBook. Generate two descriptions for "{company_name}" using ONLY factual, neutral language.
 
---- BRIEF DESCRIPTION (BD) ---
-Formula: [Role] + [Product/Service] + [Transition Phrase] + [Purpose]
-- ONE sentence only.
-- Start with: "Developer of", "Provider of", "Manufacturer of", "Operator of", or "Distributor of".
-- Transition phrase: "designed to", "aimed at", "intended to", "created to".
-- End with the company's purpose or mission.
-- Do NOT mention markets, customers, or value proposition here.
+**Output Rules**:
+1. --- BRIEF DESCRIPTION (BD) ---
+- One sentence.
+- Format: [Role] + [Product/Service] + [Transition Phrase] + [Purpose]
+- Start with: "Developer of", "Provider of", "Manufacturer of", "Operator of", or "Distributor of"
+- Transition phrase: "designed to", "intended to", "created to"
+- Example: "Distributor of endoscopy equipment intended to support medical procedures."
+2. --- FULL DESCRIPTION (FD) ---
+- Start with the exact BD.
+- Then: " The company " + factual differentiators (e.g., types of devices, partnerships, distribution model).
+- Mention market only if stated (e.g., "supplies hospitals in the UK").
+- Value proposition must be observable (e.g., "provides technical training" — not "improves outcomes").
+3. **NO marketing terms**: Avoid "high-quality", "comprehensive", "enhance", "reliable", "minimize downtime", etc.  
+4. **NO more than two full stops**.
 
---- FULL DESCRIPTION (FD) ---
-Formula: BD + " The company " + [Differentiating Features] + [Transitional Verb] + [Market] + [Value Proposition].
-- Start with the exact BD sentence.
-- Then: " The company " + key differentiators (tech, process, IP, partnerships).
-- Use a transitional verb: "serves", "targets", "supplies", "provides to".
-- Name the market (e.g., "hospitals in the UK", "enterprise SaaS companies").
-- End with clear value proposition (e.g., "improving diagnostic accuracy", "reducing operational costs").
-
---- RAW INFO ---
+**Raw Source Material**:
 {raw_text}
 
---- OUTPUT FORMAT ---
-Return ONLY a JSON object with:
+**Output Format**:  
+Return ONLY a JSON object:
 {{
   "brief_description": "...",
-  "full_description": "..."
+  "full_description": "BD. Action-verb sentence."
 }}
 """
 
@@ -159,12 +160,13 @@ Return ONLY a JSON object with:
             prompt,
             generation_config=genai.GenerationConfig(
                 response_mime_type="application/json",
-                temperature=0.2
+                temperature=0.1  # lower = more factual
             )
         )
         result = json.loads(response.text.strip())
         return result.get("brief_description", ""), result.get("full_description", "")
     except Exception as e:
-        fallback_bd = f"Distributor of medical devices for endoscopy procedures."
-        fallback_fd = f"{fallback_bd} The company supplies endoscopy equipment to healthcare providers in the UK, enhancing procedural efficiency and patient outcomes."
-        return fallback_bd, fallback_fd
+        # Fallback without marketing
+        bd = f"Distributor of medical devices for endoscopy procedures."
+        fd = f"{bd} The company supplies equipment to healthcare providers in Europe."
+        return bd, fd  
