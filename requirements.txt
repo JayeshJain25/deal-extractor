@@ -1,7 +1,8 @@
-streamlit==1.39.0
+streamlit
 trafilatura
-beautifulsoup4==4.12.3
-python-dotenv==1.0.1
-pandas==2.2.2
-google-generativeai==0.8.3
+beautifulsoup4
+python-dotenv
+pandas
+google-generativeai
+duckduckgo-search
 ddgs
