@@ -126,34 +126,49 @@ def generate_company_descriptions(company_name):
         fd = bd
         return bd, fd
 
-    prompt = f"""You are a corporate research analyst at PitchBook. Generate two descriptions for "{company_name}" using ONLY factual, neutral language.
+    prompt = f"""You are a corporate research analyst at PitchBook. Your task is to generate two descriptions for "{company_name}" using ONLY the provided source material. You must adhere strictly to a factual, neutral tone.
 
-**Output Rules**:
-1. --- BRIEF DESCRIPTION (BD) ---
-- One sentence.
-- Format: [Role] + [Product/Service] + [Transition Phrase] + [Purpose]
-- Start with: "Developer of", "Provider of", "Manufacturer of", "Operator of", or "Distributor of"
-- Transition phrase: "designed to", "intended to", "created to"
-- Example: "Distributor of endoscopy equipment intended to support medical procedures."
-2. --- FULL DESCRIPTION (FD) ---
-- Start with the exact BD.
-- Then: " The company " + factual differentiators (e.g., types of devices, partnerships, distribution model).
-- Mention market only if stated (e.g., "supplies hospitals in the UK").
-- Value proposition must be observable (e.g., "provides technical training" — not "improves outcomes").
-3. **NO marketing terms**: Avoid "high-quality", "comprehensive", "enhance", "reliable", "minimize downtime", etc.  
-4. **NO more than two full stops**.
-
-**Raw Source Material**:
+**Source Material**:
 {raw_text}
 
-**Output Format**:  
-Return ONLY a JSON object:
+---
+**Output Rules**
+
+**1. --- BRIEF DESCRIPTION (BD) ---**
+* **One sentence.**
+* **Formula**: [Company Role] + [Product/Service] + [Transition Phrase] + [Purpose]
+* **Company Role (Must start with)**: "Developer of", "Provider of", "Manufacturer of", "Operator of", or "Distributor of"
+* **Transition Phrase (Must use)**: "designed to", "intended to", or "created to"
+* **Example**: "Distributor of endoscopy equipment intended to support medical procedures."
+
+**2. --- FULL DESCRIPTION (FD) ---**
+* **Structure**: The FD must be exactly two sentences.
+* **Sentence 1**: The exact Brief Description (BD) you just generated.
+* **Sentence 2**: Must start with "The company..." and describe **factual differentiators** (e.g., key product features, technology, distribution model, target market).
+* The value proposition must be **observable and factual** (e.g., "provides 24/7 technical support" or "enables data storage") not subjective (e.g., "improves outcomes" or "is reliable").
+
+**3. --- STRICT CONSTRAINTS ---**
+* **MAXIMUM TWO FULL STOPS**: The *entire* "full_description" field must contain exactly two sentences, ending in exactly two full stops.
+* **NO REDUNDANCY**: Sentence 2 must introduce new, distinct information (e.g., specific features, technology, market) and not just rephrase the BD.
+* **NO marketing language**: Avoid all subjective or qualitative terms like "high-quality", "comprehensive", "innovative", "leading", "best-in-class", "reliable", "efficient", "enhance", "optimize", "streamline", "minimize", "maximize", etc.
+* **Factual & Neutral Tone**: All claims must be objective and verifiable from the source material. Do not infer or add information.
+* **Stick to the formulas.**
+
+---
+**Output Format**
+Return ONLY a single, valid JSON object. Do not include any other text, apologies, or explanations.
+
 {{
   "brief_description": "...",
-  "full_description": "BD. Action-verb sentence."
+  "full_description": "..."
+}}
+
+**Example of a correct final JSON output:**
+{{
+  "brief_description": "Developer of a crop-analysis drone designed to assess the health of corn and wheat crops.",
+  "full_description": "Developer of a crop-analysis drone designed to assess the health of corn and wheat crops. The company's drone uses hyperspectral imaging to detect nitrogen levels and provides data to agricultural co-ops."
 }}
 """
-
     try:
         model = genai.GenerativeModel('gemini-flash-latest')
         response = model.generate_content(
